@@ -1,83 +1,195 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Jade Delight</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.js"
+      integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+      crossorigin="anonymous"></script>
+    <title>Jade Delight</title>
 </head>
 
 <body>
 <script language="javascript">
+    function MenuItem(name, cost)
+    {
+    	this.name = name;
+    	this.cost = cost;
+    }
 
-function MenuItem(name, cost)
-{
-	this.name = name;
-	this.cost=cost;
-}
+    menuItems = new Array(
+    	new MenuItem("Chicken Chop Suey", 4.5),
+    	new MenuItem("Sweet and Sour Pork", 6.25),
+    	new MenuItem("Shrimp Lo Mein", 5.25),
+    	new MenuItem("Moo Shi Chicken", 6.5),
+    	new MenuItem("Fried Rice", 2.35)
+    );
 
-menuItems = new Array(
-	new MenuItem("Chicken Chop Suey", 4.5),
-	new MenuItem("Sweet and Sour Pork", 6.25),
-	new MenuItem("Shrimp Lo Mein", 5.25),
-	new MenuItem("Moo Shi Chicken", 6.5),
-	new MenuItem("Fried Rice", 2.35)
-);
+    function makeSelect(name, minRange, maxRange)
+    {
+    	var t = "";
+    	t = "<select name='" + name + "' size='1'>";
+    	for (j = minRange; j <= maxRange; j++)
+    	   t += "<option>" + j + "</option>";
+    	t += "</select>"; 
+    	return t;
+    }
+    
+    $(document).ready(function() {
+        //When a user selects a quantity the amount should automatically fill
+        for (i = 0; i < menuItems.length; i++) {
+            let menuCost = menuItems[i].cost;
+            let tableRow = $('.itemtable tr').eq(i+1);
+            
+            tableRow.change(function() {
+                //change text input value 
+                let selectedAmt = $(this).find(':selected').text();
+                let totalCost = (selectedAmt * menuCost).toFixed(2);
+                tableRow.find('input[name="cost"]').val(totalCost);
+                
+                //add up all the total costs for each item
+                let subtotal = 0;
+                $('input[name="cost"]').each(function() {
+                    subtotal += parseFloat($(this).val());
+                });
+                //change subtotal, tax, and total input value
+                $('#subtotal').val(subtotal);   
+                tax = (subtotal*0.0625).toFixed(2)
+                $('#tax').val(tax); 
+                total = parseFloat(tax) + subtotal;
+                $('#total').val(total);
+            });
+        }
+           
+        //street and city fields hidden unless the user selects delivery
+        $('input[value="delivery"]').click(function() {
+            $('#citystreet').css("display", "block");
+        })
+        $('input[value="pickup"]').click(function() {
+            $('#citystreet').css("display", "none");
+        })
+    })
+    
 
-function makeSelect(name, minRange, maxRange)
-{
-	var t= "";
-	t = "<select name='" + name + "' size='1'>";
-	for (j=minRange; j<=maxRange; j++)
-	   t += "<option>" + j + "</option>";
-	t+= "</select>"; 
-	return t;
-}
+    
+    function display() {
+        DispWin = window.open('', 'TheWindow');
+        DispWin.document.write("hello");
+    }
+    
+    function validate() {
+        let err = false;
+        
+        with (document.data) {
+            //last name and phone must be entered
+            if ((lname.value == "") || (phone.value == "")) {
+                alert("You did not enter a last name or phone");
+    			// document.getElementById("errPhone").style.display = "inline-block";
+    			lname.focus();
+    			err = true;
+    		} else if (phone.value.length != 10 || isNaN(phone.value)) { //phone number must be valid 
+                alert("Please enter a valid phone number");
+                err = true;
+            }
+            
+            //street and city must be entered
+            if (p_or_d[1].checked) {
+               if ((street.value == "") || (city.value == "")) {
+                   alert("You did not enter a street or city");
+                   err = true;
+               }
+            }
+            
+            //select at least one item
+            if($('#total').val() == 0) {
+                alert("Please select at least one item");
+                err = true;
+            } 
+            
+            if (err == false) {
+                if (p_or_d[0].checked) {
+                    deliverytime = 15;
+                } else if (p_or_d[1].checked) {
+                    deliverytime = 30;
+                }
+                
+                let oldDateObj = new Date();
+                let newDateObj = new Date(oldDateObj.getTime() + deliverytime*60000);
+                let hour = newDateObj.getHours();
+                let minutes = newDateObj.getMinutes();
+                let total = $('#total').val();
+                let selectedAmt = $('"quan"+i').find(':selected').text();
+
+                DispWin = window.open('', 'TheWindow');
+                let menuitems = "";
+                for (i = 0; i < menuItems.length; i++)
+                {
+                    menuitems += selectedAmt + " ";
+                    menuitems += menuItems[i].name + "<br/>";
+                }
+                
+                console.log(menuitems);
+                DispWin.document.write("Thank you for your order! <br/> It will be ready at " 
+                + hour + ":" + minutes +
+                ". <br/>Your total amount is $" + total + 
+                ". <br> Your order is " + menuitems);
+            }
+        }   
+        
+        return !err;
+    }
 </script>
 
 <h1>Jade Delight</h1>
-<form>
+
+<form
+    name="data"
+    method="post" 
+    onsubmit="return validate()" 
+>
 
 <p>First Name: <input type="text"  name='fname' /></p>
 <p>Last Name*:  <input type="text"  name='lname' /></p>
-<p>Street: <input type="text"  name='street' /></p>
-<p>City: <input type="text"  name='city' /></p>
+<div id="citystreet" style="display: none">
+    <p>Street: <input type="text"  name='street' /></p>
+    <p>City: <input type="text"  name='city' /></p>
+</div>
 <p>Phone*: <input type="text"  name='phone' /></p>
 <p> 
-	<input type="radio"  name="p_or_d" value = "pickup" checked="checked"/>Pickup  
-	<input type="radio"  name='p_or_d' value = 'delivery'/>
-	Delivery
+	<input type="radio"  name="p_or_d" value="pickup"  checked="checked"/>Pickup  
+	<input type="radio"  name="p_or_d" value="delivery"/>Delivery
 </p>
-<table border="0" cellpadding="3">
+<table class="itemtable" border="0" cellpadding="3">
   <tr>
     <th>Select Item</th>
     <th>Item Name</th>
     <th>Cost Each</th>
     <th>Total Cost</th>
   </tr>
-<script language="javascript">
 
+<script language="javascript">
   var s = "";
-  for (i=0; i< menuItems.length; i++)
+  for (i = 0; i < menuItems.length; i++)
   {
 	  s += "<tr><td>";
 	  s += makeSelect("quan" + i, 0, 10);
 	  s += "</td><td>" + menuItems[i].name + "</td>";
 	  s += "<td> $ " + menuItems[i].cost.toFixed(2) + "</td>";
-	  s += "<td>$<input type='text' name='cost'/></td></tr>";
+	  s += "<td>$<input type='text' name='cost' value='0'/></td></tr>";
   }
   document.writeln(s);
 </script>
 </table>
 <p>Subtotal: 
-   $<input type="text"  name='subtotal' id="subtotal" />
+   $ <input type="text"  name='subtotal' id="subtotal" value='0' />
 </p>
 <p>Mass tax 6.25%:
-  $ <input type="text"  name='tax' id="tax" />
+  $ <input type="text"  name='tax' id="tax" value='0' />
 </p>
-<p>Total: $ <input type="text"  name='total' id="total" />
+<p>Total: $ <input type="text"  name='total' id="total" value='0' />
 </p>
 
-<input type = "button" value = "Submit Order" />
-
+<input type="submit" value="Submit Order" />
 </form>
 </body>
 </html>
