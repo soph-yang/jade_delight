@@ -56,7 +56,7 @@
                 $('#subtotal').val(subtotal);   
                 tax = (subtotal*0.0625).toFixed(2)
                 $('#tax').val(tax); 
-                total = parseFloat(tax) + subtotal;
+                total = (parseFloat(tax) + subtotal).toFixed(2);
                 $('#total').val(total);
             });
         }
@@ -69,25 +69,18 @@
             $('#citystreet').css("display", "none");
         })
     })
-    
 
-    
-    function display() {
-        DispWin = window.open('', 'TheWindow');
-        DispWin.document.write("hello");
-    }
-    
     function validate() {
         let err = false;
         
         with (document.data) {
             //last name and phone must be entered
             if ((lname.value == "") || (phone.value == "")) {
-                alert("You did not enter a last name or phone");
-    			// document.getElementById("errPhone").style.display = "inline-block";
+                alert("You did not enter a last name and/or phone");
     			lname.focus();
     			err = true;
-    		} else if (phone.value.length != 10 || isNaN(phone.value)) { //phone number must be valid 
+            //phone number must be valid 
+    		} else if (phone.value.length != 10 || isNaN(phone.value)) { 
                 alert("Please enter a valid phone number");
                 err = true;
             }
@@ -95,7 +88,7 @@
             //street and city must be entered
             if (p_or_d[1].checked) {
                if ((street.value == "") || (city.value == "")) {
-                   alert("You did not enter a street or city");
+                   alert("You did not enter a street and/or city");
                    err = true;
                }
             }
@@ -107,32 +100,42 @@
             } 
             
             if (err == false) {
+                //Getting delivery time
                 if (p_or_d[0].checked) {
                     deliverytime = 15;
                 } else if (p_or_d[1].checked) {
                     deliverytime = 30;
                 }
-                
                 let oldDateObj = new Date();
-                let newDateObj = new Date(oldDateObj.getTime() + deliverytime*60000);
-                let hour = newDateObj.getHours();
+                let newDateObj = new Date(oldDateObj.getTime() + deliverytime * 60000);
+                let hours = newDateObj.getHours();
                 let minutes = newDateObj.getMinutes();
-                let total = $('#total').val();
-                let selectedAmt = $('"quan"+i').find(':selected').text();
+                let ampm = hours >= 12 ? 'pm' : 'am';
+                hours = hours % 12;
+                hours = hours ? hours : 12; 
+                minutes = minutes < 10 ? '0'+ minutes : minutes;
 
-                DispWin = window.open('', 'TheWindow');
+                //Getting menu items
                 let menuitems = "";
-                for (i = 0; i < menuItems.length; i++)
-                {
+                for (i = 0; i < menuItems.length; i++) {
+                    let tableRow = $('.itemtable tr').eq(i+1);
+                    let selectedAmt = tableRow.find(':selected').text();
+
                     menuitems += selectedAmt + " ";
                     menuitems += menuItems[i].name + "<br/>";
-                }
+                } 
                 
-                console.log(menuitems);
-                DispWin.document.write("Thank you for your order! <br/> It will be ready at " 
-                + hour + ":" + minutes +
-                ". <br/>Your total amount is $" + total + 
-                ". <br> Your order is " + menuitems);
+                //Displaying in a new window
+                DispWin = window.open('', 'TheWindow');
+                DispWin.document.write(
+                    "Thank you for your order! <br/> It will be ready at " 
+                    + hours + ":" + minutes + ampm +
+                    ". <br/>Your total amount is $" + $('#total').val() + 
+                    ". <br/><br/>Your order is: <br/>" + menuitems
+                );
+                DispWin.opener.document.write(
+                    '<input type="button" value="Place a new order" onClick="window.location.reload();DispWin.close();">'
+                );
             }
         }   
         
@@ -178,6 +181,7 @@
 	  s += "<td>$<input type='text' name='cost' value='0'/></td></tr>";
   }
   document.writeln(s);
+  
 </script>
 </table>
 <p>Subtotal: 
