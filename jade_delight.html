@@ -75,7 +75,8 @@
         
         with (document.data) {
             //last name and phone must be entered
-            let phonenum = phone.value.replaceAll("-", ""); //allow inputs number with dashes
+            let phonenum = //allow inputs number with dashes and parenthesis
+            phone.value.replaceAll("-", "").replaceAll("(", "").replaceAll(")", ""); 
             if ((lname.value == "") || (phone.value == "")) {
                 alert("You did not enter a last name and/or phone");
     			lname.focus();
