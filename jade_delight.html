@@ -75,12 +75,13 @@
         
         with (document.data) {
             //last name and phone must be entered
+            let phonenum = phone.value.replaceAll("-", ""); //allow inputs number with dashes
             if ((lname.value == "") || (phone.value == "")) {
                 alert("You did not enter a last name and/or phone");
     			lname.focus();
     			err = true;
             //phone number must be valid 
-    		} else if (phone.value.length != 10 || isNaN(phone.value)) { 
+    		} else if (phonenum.length != 10 || isNaN(phonenum)) { 
                 alert("Please enter a valid phone number");
                 err = true;
             }
@@ -181,7 +182,6 @@
 	  s += "<td>$<input type='text' name='cost' value='0'/></td></tr>";
   }
   document.writeln(s);
-  
 </script>
 </table>
 <p>Subtotal: 
